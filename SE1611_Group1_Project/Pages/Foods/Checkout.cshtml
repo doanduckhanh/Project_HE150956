@@ -1,0 +1,52 @@
+﻿@page
+@using BusinessObjects.Models;
+@using SE1611_Group1_Project.Models;
+@model SE1611_Group1_Project.Pages.Foods.CheckoutModel
+@{
+    FoodOrderContext foodOrderContext = new FoodOrderContext();
+    int i = 1;
+}
+<div class="container">
+    <h2 style="margin-top:10px">Bill Export</h2>
+    <table class="table table-hover" style="margin-top:10px">
+        <thead>
+            <tr class="table-primary">
+                <th scope="col">Number</th>
+                <th scope="col">Food</th>
+                <th scope="col">Unit Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model.orderDetailDTOs)
+            {
+                <tr>
+                    <th scope="row">@i</th>
+                    <td>@foodOrderContext.Foods.FirstOrDefault(x => x.FoodId == item.FoodId).FoodName</td>
+                    <td>@item.UnitPrice</td>
+                    <td>@item.Quantity</td>
+                    <td>@{
+                            var quantity = item.Quantity;
+                            var unitprice = item.UnitPrice;
+                            var sum = quantity * unitprice;
+                        }
+                        @sum
+                    </td>
+                    @{i++;}
+                </tr>
+            }
+            
+        </tbody>
+    </table>
+    <center>
+        <div>
+            <h2>Total : @ViewData["Total"]</h2>
+            <h3>Promo Code : @Model.promocode</h3>
+        </div>
+        <form method="post">
+            <input type="submit" value="Order" class="btn btn-primary" />
+        </form>
+    </center>
+    
+</div>

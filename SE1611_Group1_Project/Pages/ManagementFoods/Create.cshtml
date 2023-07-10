@@ -1,0 +1,82 @@
+﻿@page
+@model SE1611_Group1_Project.Pages.ManagementFoods.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container">
+    <h1>Create page</h1>
+    <hr/>
+    <form method="post" enctype="multipart/form-data">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group my-1">
+                    <label class="control-label mb-2">Name</label>
+                    <input asp-for="Food.FoodName" required class="form-control" />
+                    <span asp-validation-for="Food.FoodName" class="text-danger"></span>
+                </div>
+                <div class="form-group my-1">
+                    <label class="control-label mb-2">Price</label>
+                    <input asp-for="Food.FoodPrice" min="1" required class="form-control" />
+                    <span asp-validation-for="Food.FoodPrice" class="text-danger"></span>
+                </div>
+
+                @*            <div class="form-group">
+                <label asp-for="Food.FoodStatus" class="control-label"></label>
+                <input asp-for="Food.FoodStatus"  class="form-control" />
+                <span asp-validation-for="Food.FoodStatus" class="text-danger"></span>
+                </div>*@
+                <label class="mb-2">Status</label>
+                <div class="form-check">
+                    <input asp-for="Food.FoodStatus" class="form-check-input" type="radio" name="Food.FoodStatus" id="food-status-equal-to-0" value="0" checked>
+                    <label class="form-check-label" for="food-status-equal-to-0">
+                        Deactived
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="Food.FoodStatus" class="form-check-input" type="radio" name="Food.FoodStatus" id="food-status-not-equal-to-0" value="1">
+                    <label class="form-check-label" for="food-status-not-equal-to-0">
+                        Actived
+                    </label>
+                </div>
+                <div class="form-group my-1">
+                    <label class="control-label mb-2">Category</label>
+                    <select asp-for="Food.CategoryId" required class="form-control" asp-items="ViewBag.CategoryId"></select>
+                </div>
+                <div class="form-group my-1">
+                    <input type="submit" value="Create" class="btn btn-primary mt-2" />
+                </div>
+
+            </div>
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input id="btnChoose" class="form-control" required type="file" name="file" />
+                </div>
+                <div style="width:100%">
+                    <img class="w-100" id="blah" src="/images/bg.jpeg" alt="your image" />
+                </div>
+            </div>
+        </div>
+    </form>
+    <div>
+        <a asp-page="Index">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}
+<script>
+    btnChoose.onchange = evt => {
+        const [file] = btnChoose.files
+        if (file) {
+            blah.src = URL.createObjectURL(file)
+        }
+    }
+</script>
