@@ -23,6 +23,9 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Promo[0].PromoDescribe)
                 </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Promo[0].PromoStatus)
+                </th>
                 <th></th>
             </tr>
         </thead>
@@ -40,9 +43,10 @@
                         @Html.DisplayFor(modelItem => item.PromoDescribe)
                     </td>
                     <td>
+                        @Html.DisplayFor(modelItem => item.PromoStatus)
+                    </td>
+                    <td>
                         <button type="button" class="btn btn-primary"><a style="text-decoration : none; color:white;" asp-page="./Edit" asp-route-id="@item.PromoCode">Edit</a></button>
-                        
-                        <button type="button" class="btn btn-danger"><a style="text-decoration : none; color:white;" asp-page="./Delete" asp-route-id="@item.PromoCode">Delete</a></button>
                     </td>
                 </tr>
             }

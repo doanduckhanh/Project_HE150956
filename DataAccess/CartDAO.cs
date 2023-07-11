@@ -51,7 +51,7 @@ namespace DataAccess
                               select cartItems.Count * cartItems.Food.FoodPrice).Sum();
 
             var promo = context.Promos.SingleOrDefault(
-                c => c.PromoCode.Equals(Code));
+                c => c.PromoCode.Equals(Code) && c.PromoStatus == true);
 
             if (promo != null)
             {

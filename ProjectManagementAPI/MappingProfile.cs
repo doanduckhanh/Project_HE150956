@@ -15,6 +15,7 @@ namespace ProjectManagementAPI
             CreateMap<NewUserDTO, User>().ReverseMap();
             CreateMap<NewCartDTO, Cart>().ReverseMap();
             CreateMap<Cart, CartDTO>().ReverseMap().ForMember(dest => dest.Food, opt => opt.MapFrom(src =>src.Food));
+            CreateMap<PromoDTO, Promo>().ReverseMap();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace SE1611_Group1_Project.Pages.Foods
 {
     public class CheckoutModel : PageModel
     {
-        FoodOrderContext foodOrderContext = new FoodOrderContext(); 
         [BindProperty(SupportsGet = true)]
         public decimal total { get; set; }
         [BindProperty(SupportsGet = true)]
@@ -42,73 +41,73 @@ namespace SE1611_Group1_Project.Pages.Foods
         }
         public async Task<IActionResult> OnPost()
         {
-            orderDetailDTOs = JsonSerializer.Deserialize<List<OrderDetailDTO>>(HttpContext.Session.GetString("OrderDetailList"));
-            Order order = new Order();
-            order.OrderDate = DateTime.Now;
-            if(HttpContext.Session.GetString("CodePromo") != null)
-            {
-                promocode = HttpContext.Session.GetString("CodePromo");
-            } else
-            {
-                promocode = null;
-            }
-            order.PromoCode = promocode;
-            order.UserName = HttpContext.Session.GetString("Username");
-            total = Decimal.Parse(HttpContext.Session.GetString("Total"));
-            order.Total = total;
-            order.UserId = int.Parse(HttpContext.Session.GetInt32("UserId").ToString());
-            CreateOrder(order, orderDetailDTOs);
+            //orderDetailDTOs = JsonSerializer.Deserialize<List<OrderDetailDTO>>(HttpContext.Session.GetString("OrderDetailList"));
+            //Order order = new Order();
+            //order.OrderDate = DateTime.Now;
+            //if(HttpContext.Session.GetString("CodePromo") != null)
+            //{
+            //    promocode = HttpContext.Session.GetString("CodePromo");
+            //} else
+            //{
+            //    promocode = null;
+            //}
+            //order.PromoCode = promocode;
+            //order.UserName = HttpContext.Session.GetString("Username");
+            //total = Decimal.Parse(HttpContext.Session.GetString("Total"));
+            //order.Total = total;
+            //order.UserId = int.Parse(HttpContext.Session.GetInt32("UserId").ToString());
+            //CreateOrder(order, orderDetailDTOs);
             return RedirectToPage("/Foods/Index");
         }
-        public int CreateOrder(Order order, List<OrderDetailDTO> orderDetailDTOs)
-        {
+        //public int CreateOrder(Order order, List<OrderDetailDTO> orderDetailDTOs)
+        //{
 
-            decimal orderTotal = decimal.Parse(HttpContext.Session.GetString("Total"));
-            // Set the order's total to the orderTotal count
-            order.Total = orderTotal;
-            // Save the order
-                foodOrderContext.Orders.Add(order);
-                foodOrderContext.SaveChanges();
-            int orderID = foodOrderContext.Orders.Select(o => o.OrderId).Max();
-            // Iterate over the items in the cart, adding the order details for each
-            foreach (OrderDetailDTO item in orderDetailDTOs)
-            {
-                var orderDetail = new OrderDetail
-                {
-                    FoodId = item.FoodId,
-                    OrderId = orderID,
-                    UnitPrice = item.UnitPrice,
-                    Quantity = item.Quantity
-                };
-                try
-                {
-                    foodOrderContext.OrderDetails.Add(orderDetail);
-                    foodOrderContext.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    //MessageBox.Show(ex.Message);
-                    return -1;
-                }
-            }
-            // Empty the shopping cart
-            EmptyCart();
-            HttpContext.Session.SetInt32("Count", 0);
-            // Return the OrderId as the confirmation number
-            return orderID;
-        }
+        //    decimal orderTotal = decimal.Parse(HttpContext.Session.GetString("Total"));
+        //    // Set the order's total to the orderTotal count
+        //    order.Total = orderTotal;
+        //    // Save the order
+        //        foodOrderContext.Orders.Add(order);
+        //        foodOrderContext.SaveChanges();
+        //    int orderID = foodOrderContext.Orders.Select(o => o.OrderId).Max();
+        //    // Iterate over the items in the cart, adding the order details for each
+        //    foreach (OrderDetailDTO item in orderDetailDTOs)
+        //    {
+        //        var orderDetail = new OrderDetail
+        //        {
+        //            FoodId = item.FoodId,
+        //            OrderId = orderID,
+        //            UnitPrice = item.UnitPrice,
+        //            Quantity = item.Quantity
+        //        };
+        //        try
+        //        {
+        //            foodOrderContext.OrderDetails.Add(orderDetail);
+        //            foodOrderContext.SaveChanges();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            //MessageBox.Show(ex.Message);
+        //            return -1;
+        //        }
+        //    }
+        //    // Empty the shopping cart
+        //    EmptyCart();
+        //    HttpContext.Session.SetInt32("Count", 0);
+        //    // Return the OrderId as the confirmation number
+        //    return orderID;
+        //}
 
-        public void EmptyCart()
-        {
-            var cartItems = foodOrderContext.Carts
-                .Where(cart => cart.CartId == SettingsCart.CartId);
+        //public void EmptyCart()
+        //{
+        //    var cartItems = foodOrderContext.Carts
+        //        .Where(cart => cart.CartId == SettingsCart.CartId);
 
-            foreach (var cartItem in cartItems)
-            {
-                foodOrderContext.Carts.Remove(cartItem);
-            }
-            // Save changes
-            foodOrderContext.SaveChanges();
-        }
+        //    foreach (var cartItem in cartItems)
+        //    {
+        //        foodOrderContext.Carts.Remove(cartItem);
+        //    }
+        //    // Save changes
+        //    foodOrderContext.SaveChanges();
+        //}
     }
 }

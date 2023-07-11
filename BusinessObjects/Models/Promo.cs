@@ -13,6 +13,7 @@ namespace BusinessObjects.Models
         public string PromoCode { get; set; } = null!;
         public string? PromoValue { get; set; }
         public string? PromoDescribe { get; set; }
+        public bool? PromoStatus { get; set; }
 
         public virtual ICollection<Order> Orders { get; set; }
     }

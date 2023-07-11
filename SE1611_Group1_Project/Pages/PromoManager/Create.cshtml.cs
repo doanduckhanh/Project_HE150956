@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BusinessObjects.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +15,15 @@ namespace SE1611_Group1_Project.PromoManager
 {
     public class CreateModel : PageModel
     {
-        private readonly FoodOrderContext _context;
+        private readonly HttpClient client;
+        private readonly string PromoApiUrl = "";
 
-        public CreateModel(FoodOrderContext context)
+        public CreateModel()
         {
-            _context = context;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            PromoApiUrl = "https://localhost:7203/api/Promos";
         }
 
         public IActionResult OnGet()
@@ -36,20 +43,21 @@ namespace SE1611_Group1_Project.PromoManager
             return Page();
         }
 
-        [BindProperty]
+        [BindProperty(SupportsGet = true)]
         public Promo Promo { get; set; } = default!;
         
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-          if (!ModelState.IsValid || _context.Promos == null || Promo == null)
+          if (!ModelState.IsValid || Promo == null)
             {
                 return Page();
             }
 
-            _context.Promos.Add(Promo);
-            await _context.SaveChangesAsync();
+            HttpContent httpContent = new StringContent(JsonSerializer.Serialize(Promo), Encoding.UTF8, "application/json");
+            HttpResponseMessage responseMessage = await client.PostAsync(PromoApiUrl, httpContent);
+            string strdata = await responseMessage.Content.ReadAsStringAsync();
 
             return RedirectToPage("./Index");
         }

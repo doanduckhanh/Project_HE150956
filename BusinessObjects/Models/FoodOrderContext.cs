@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 
 namespace BusinessObjects.Models
 {
@@ -30,8 +29,8 @@ namespace BusinessObjects.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-                optionsBuilder.UseSqlServer(config.GetConnectionString("ConnectionStrings"));
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("server=localhost; database=FoodOrder;Integrated security=true;");
             }
         }
 
@@ -179,6 +178,8 @@ namespace BusinessObjects.Models
                     .HasMaxLength(50)
                     .IsUnicode(false)
                     .HasColumnName("Promo_Describe");
+
+                entity.Property(e => e.PromoStatus).HasColumnName("Promo_Status");
 
                 entity.Property(e => e.PromoValue)
                     .HasMaxLength(10)

@@ -1,27 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BusinessObjects.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using ProjectManagementAPI.DTO;
 using SE1611_Group1_Project.Models;
 
 namespace SE1611_Group1_Project.PromoManager
 {
     public class EditModel : PageModel
     {
-        private readonly FoodOrderContext _context;
+        private readonly HttpClient client;
+        private readonly string PromoApiUrl = "";
 
-        public EditModel(FoodOrderContext context)
+        public EditModel()
         {
-            _context = context;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            PromoApiUrl = "https://localhost:7203/api/Promos";
         }
 
-        [BindProperty]
-        public Promo Promo { get; set; } = default!;
+        [BindProperty(SupportsGet =true)]
+        public PromoDTO Promo { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
@@ -37,12 +45,18 @@ namespace SE1611_Group1_Project.PromoManager
             {
                 Response.Redirect("/Auth/403");
             }
-            if (id == null || _context.Promos == null)
+            if (id == null )
             {
                 return NotFound();
             }
-
-            var promo =  await _context.Promos.FirstOrDefaultAsync(m => m.PromoCode == id);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+            HttpResponseMessage responseMessage = await client.GetAsync(PromoApiUrl);
+            string strdata = await responseMessage.Content.ReadAsStringAsync();
+            List<PromoDTO> promos = JsonSerializer.Deserialize<List<PromoDTO>>(strdata, options);
+            PromoDTO promo =  promos.FirstOrDefault(m => m.PromoCode == id);
             if (promo == null)
             {
                 return NotFound();
@@ -59,31 +73,13 @@ namespace SE1611_Group1_Project.PromoManager
             {
                 return Page();
             }
+            string url = PromoApiUrl + "/" + Promo.PromoCode;
+            HttpContent httpContent = new StringContent(JsonSerializer.Serialize(Promo), Encoding.UTF8, "application/json");
+            HttpResponseMessage responseMessage = await client.PutAsync(PromoApiUrl,httpContent);
+            string strdata = await responseMessage.Content.ReadAsStringAsync();
 
-            _context.Attach(Promo).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PromoExists(Promo.PromoCode))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
 
             return RedirectToPage("./Index");
-        }
-
-        private bool PromoExists(string id)
-        {
-          return (_context.Promos?.Any(e => e.PromoCode == id)).GetValueOrDefault();
         }
     }
 }

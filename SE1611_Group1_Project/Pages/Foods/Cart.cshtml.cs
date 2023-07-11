@@ -18,11 +18,12 @@ namespace SE1611_Group1_Project.Pages.Foods
     {
         private readonly HttpClient client = null;
         private readonly string CartApiUrl = "";
+        private readonly string PromoApiUrl = "";
         [BindProperty(SupportsGet = true)]
         public decimal total { get; set; }
         public int countItem { get; set; }
 
-        [BindProperty]
+        [BindProperty(SupportsGet =true)]
         public string Code { get; set; } = "NOGV";
         public CartModel()
         {
@@ -30,6 +31,7 @@ namespace SE1611_Group1_Project.Pages.Foods
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             client.DefaultRequestHeaders.Accept.Add(contentType);
             CartApiUrl = "https://localhost:7203/api/Carts";
+            PromoApiUrl = "https://localhost:7203/api/Promos";
         }
         [BindProperty]
         public List<CartDTO> Cart { get; set; } = default;
@@ -105,21 +107,40 @@ namespace SE1611_Group1_Project.Pages.Foods
         public async Task<IActionResult> OnPostGiveCode()
         {
             // Retrieve session data
-            //ViewData["Role"] = HttpContext.Session.GetInt32("Role");
-            //ViewData["Username"] = HttpContext.Session.GetString("Username");
-            //ViewData["UserId"] = HttpContext.Session.GetInt32("UserId");
-            //ViewData["Total"] = HttpContext.Session.GetString("Total");
+            ViewData["Role"] = HttpContext.Session.GetInt32("Role");
+            ViewData["Username"] = HttpContext.Session.GetString("Username");
+            ViewData["UserId"] = HttpContext.Session.GetInt32("UserId");
+            ViewData["Total"] = HttpContext.Session.GetString("Total");
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+            string url = PromoApiUrl + "?$filter=PromoCode eq '" + Code + "'";
+            HttpResponseMessage responseMessage = await client.GetAsync(url);
+            string strData = await responseMessage.Content.ReadAsStringAsync();
+            PromoDTO promo = JsonSerializer.Deserialize<List<PromoDTO>>(strData,options).FirstOrDefault();
 
-            //var promo = _context.Promos.SingleOrDefault(
-            //    c => c.PromoCode.Equals(Code));
-            //if (promo == null)
-            //{
-            //    ViewData["MyString"] = "Coupon code has expired or is incorrect";
-            //}
-            //else
-            //{
-            //    ViewData["MyString"] = "";
-            //}
+            var cartid = HttpContext.Session.GetString("Username");
+            string urlCart = CartApiUrl + "/GetCart/" + cartid;
+            responseMessage = await client.GetAsync(urlCart);
+            string strCart = await responseMessage.Content.ReadAsStringAsync();
+            Cart = JsonSerializer.Deserialize<List<CartDTO>>(strCart, options);
+            string urlTotal = CartApiUrl + "/GetTotal" + "/" + cartid + "/" + Code;
+            responseMessage = await client.GetAsync(urlTotal);
+            string strTotal = await responseMessage.Content.ReadAsStringAsync();
+            total = Decimal.Parse(strTotal);
+            HttpContext.Session.SetString("Total", total.ToString());
+            ViewData["Total"] = HttpContext.Session.GetString("Total");
+
+
+            if (promo == null)
+            {
+                ViewData["MyString"] = "Coupon code has expired or is incorrect";
+            }
+            else
+            {
+                ViewData["MyString"] = promo.PromoDescribe;
+            }
 
             return Page();
         }
@@ -140,6 +161,15 @@ namespace SE1611_Group1_Project.Pages.Foods
 
         public async Task<IActionResult> OnPostCheckOut()
         {
+            var cartid = HttpContext.Session.GetString("Username");
+            string url = CartApiUrl + "/GetCart/" + cartid;
+            HttpResponseMessage responseMessage = await client.GetAsync(url);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+            string strCart = await responseMessage.Content.ReadAsStringAsync();
+            Cart = JsonSerializer.Deserialize<List<CartDTO>>(strCart, options);
             // HttpContext.Session.SetString("Total", total.ToString());
             List<OrderDetailDTO> orderDetailDTOs = new List<OrderDetailDTO>();
             foreach (CartDTO cart in Cart)
@@ -151,6 +181,7 @@ namespace SE1611_Group1_Project.Pages.Foods
                 orderDetailDTOs.Add(orderDetailDTO);
             }
             HttpContext.Session.SetString("OrderDetailList", JsonSerializer.Serialize(orderDetailDTOs));
+            HttpContext.Session.SetString("CodePromo", Code);
             return RedirectToPage("/Foods/Checkout");
         }
     }
